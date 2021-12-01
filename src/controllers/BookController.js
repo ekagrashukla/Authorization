@@ -14,7 +14,7 @@ const insertbook = async (req,res)=>{
 
 const getBook =  async (req,res)=>{
     const {bookid} = req.params;
-    const book = await Book.findById(bookid).populate("authors")
+    const book = await Book.findById(bookid)
     res.send(book);
 }
 
