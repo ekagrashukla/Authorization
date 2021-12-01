@@ -10,9 +10,7 @@ const register = (req,res,next) => {
             })
         }
         let user = new User ({
-            name: req.body.name,
-            email: req.body.email,
-            phone: req.body.phone,
+            username: req.body.username,
             password: hashedPass
         })
     
@@ -34,7 +32,7 @@ const register = (req,res,next) => {
 const login = (req,res,next) => {
     var username = req.body.username
     var password = req.body.password
-    User.findOne({$or: [{email:username}, {phone:username}]})
+    User.findOne({username:username})
     .then(user => {
         if(user){
             bcrypt.compare(password,user.password, function(err,result){
@@ -44,7 +42,7 @@ const login = (req,res,next) => {
                     })
                 }
                 if(result){
-                    let token = jwt.sign({name:user.name}, 'verysecretvalue', {expiresIn: '60s'})
+                    let token = jwt.sign({name:user.name}, 'verysecretvalue', {expiresIn: '10d'})
                     let refreshtoken = jwt.sign({name:user.name}, 'refreshtokensecretvalue', {expiresIn: '48h'})
                     res.json({
                         message: 'Login Successful',
@@ -78,7 +76,7 @@ const refreshToken = (req,res,next) => {
             let token = jwt.sign({name:decode.name},"verysecretvalue", {expiresIn:'30s'})
             let refreshToken = req.body.refreshToken
             res.status(200).json({
-                message: "Token Rfreshed Successfully",
+                message: "Token Refreshed Successfully",
                 token,
                 refreshToken
             })
