@@ -1,6 +1,8 @@
 const User = require('../models/User')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const nodemailer = require("nodemailer");
+const config = require("../../config.json")
 
 const register = (req,res,next) => {
     bcrypt.hash(req.body.password, 10, function(err, hashedPass){
@@ -85,7 +87,67 @@ const refreshToken = (req,res,next) => {
     })
 }
 
+async function sendmail(userEmail, userName, verificationToken = null) {
+    console.log("test")
+    let testAccount = await nodemailer.createTestAccount();
+    let transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: config.EMAIL,
+        pass: config.PASS, 
+      },
+      tls:{
+          rejectUnauthorized:false
+      }
+    });
+        var info = await transporter.sendMail({
+            from: `"Forgot Password? 👻" ${config.EMAIL}>`, 
+            to: userEmail,
+            subject: `Hello ${userName}` ,
+            text: `Hi ${userName}! Here's the link to reset your password ==> http://localhost:8000/auth/resetpassword/${verificationToken}`
+          //   html: "<b>Hello world?</b>",
+          });
+  
+    console.log("Message sent: %s", info.messageId);
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  }
+
+const forgotpassword = (req,res) => {
+    const username = req.body.username 
+    const email = req.body.email
+    let resettoken = jwt.sign({username:username}, 'verysecretvalue', {expiresIn: '10m'})
+    sendmail(email, username,resettoken)
+    res.send("done")
+}
+
+const resetpassword = async (req,res) => {
+    const newpassword = req.body.newpassword
+    const uname = (jwt.verify(req.params.tkn.toString(),"verysecretvalue"))
+    try {
+        console.log(newpassword)
+        console.log(uname)
+        const data = await User.findOne({username:uname.username})
+        console.log(data)
+        bcrypt.hash(newpassword, 10, async (err, hashedPass) => {
+            if(err){
+                res.json({
+                    error:err
+                })
+            }
+                console.log(hashedPass)
+                data.password = hashedPass
+                
+                await data.save()
+                res.send("Password changed successfully")
+            })
+    } catch (error) {
+        res.send(error)
+    }
+}
+
 
 module.exports = {
-    register,login,refreshToken
+    register,login,refreshToken, forgotpassword, sendmail, resetpassword
 }

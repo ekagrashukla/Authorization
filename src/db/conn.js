@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const config = require("../../config.json")
 
-const uri = ""
+const uri = config.URI
 
 mongoose.connect(uri)
 const db = mongoose.connection 
