@@ -1,100 +1,22 @@
 const express = require('express')
 const Employee = require('../models/Employee')
+const { indexService, showService, storeService, updateService, destroyService } = require('../services/EmployeeService')
 
 //show the list of employees
-const index = (req,res,next) => {
-    Employee.find()
-    .then(response => {
-        res.json({
-            response
-        })
-    })
-    .catch(error => {
-        message: 'An error Occured'
-    })
-}
-
-const show = (req,res,next) => {
-    console.log("inside")
-    let employeeID = req.body.employeeID
-    Employee.findById(employeeID)
-    .then(response => {
-        res.json({
-            response
-        })
-    })
-    .catch(error => {
-        res.json({
-            message: 'An error occured'
-        })
-    })
-}
+const index = (req,res) => indexService(req,res)
+const show = (req,res) => showService(req,res)
 
 // add a new employee
 
-const store = (req,res,next) => {
-    let employee = new Employee({
-        name: req.body.name,
-        designation: req.body.designation,
-        email: req.body.email,
-        phone: req.body.phone,
-        age: req.body.age
-    })
-    employee.save()
-    .then(response => {
-        res.json({
-            message: "Employee added successfully"
-        })
-    })
-    .catch(error => {
-            res.json({
-                message: "An error occured"
-            })
-        })
-}
+const store = (req,res) => storeService(req,res)
 
 //update an employee
 
-const update = (req,res,next) => {
-    let employeeID = req.body.employeeID
-
-    let updatedData = {
-        name: req.body.name,
-        designation: req.body.designation,
-        email: req.body.email,
-        phone: req.body.phone,
-        age: req.body.age
-    }
-
-    Employee.findByIdAndUpdate(employeeID, {$set: updatedData})
-    .then(() => {
-        res.json({
-            message: "Employee updated successfully"
-        })
-    })
-    .catch(error => {
-        res.json({
-            message: "An error occured"
-        })
-    })
-}
+const update = (req,res) => updateService(req,res)
 
 // delete an employee
 
-const destroy = (req,res,next) => {
-    let employeeID = req.body.employeeID
-    Employee.findByIdAndRemove(employeeID)
-    .then(()=>{
-        res.json({
-            message: "Employee deleted successfully"
-        })
-    })
-    .catch(error => {
-        res.json({
-            message: "An error occured"
-        })
-    })
-}
+const destroy = (req,res) => destroyService(req,res)
 
 module.exports = {
     index,show,store, update, destroy

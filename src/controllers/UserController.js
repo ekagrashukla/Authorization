@@ -1,35 +1,12 @@
 const express = require('express');
-const User = require("../models/User")
+const User = require("../models/User");
+const { createuserService, readbookService, userinfoService } = require('../services/UserService');
 
 
-const createUser = async(req,res) => {
-    try {
-        const docUser =  await User.create(req.body);
-        res.send(docUser)
-    } catch (error) {
-      res.status(400).send(error)
-    }
-}  
+const createUser = (req,res) => createuserService(req,res) 
 
-const readbook = async (req,res) => {
-    try {
-        const {username,bookId} = req.params;
-        const user = await User.findOneAndUpdate(
-        username,
-        { $push: { booksRead: bookId } },
-        { new: true, useFindAndModify: false })
-        res.send(`Ok ${username}. You have read book id ${bookId}`)
-    } catch (error) {
-        res.send(error)
-    }
-    
-  }
+const readbook = (req,res) => readbookService(req,res)
 
-const userinfo = async(req,res) => {
-    const {userinfo} = req.params
-    const userInfo = await User.find(userinfo)
-    console.log(userInfo)
-    res.send(userInfo)
-  }
+const userinfo = (req,res) => userinfoService(req,res)
 
 module.exports = {createUser, readbook, userinfo}
